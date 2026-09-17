@@ -9,10 +9,28 @@ class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
-        // Hapus data project lama agar tidak terjadi duplikat.
-        DB::table('projects')->truncate();
+        /*
+        |--------------------------------------------------------------------------
+        | Hapus data lama
+        |--------------------------------------------------------------------------
+        |
+        | project_images memiliki foreign key ke projects.
+        | Karena itu project_images harus dihapus terlebih dahulu.
+        |
+        */
 
-        // Masukkan seluruh project dari database lokal.
+        if (DB::getSchemaBuilder()->hasTable('project_images')) {
+            DB::table('project_images')->delete();
+        }
+
+        DB::table('projects')->delete();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Masukkan data project
+        |--------------------------------------------------------------------------
+        */
+
         DB::table('projects')->insert([
             [
                 'name' => 'WEB PARFUM PRAMIL LUXE',
