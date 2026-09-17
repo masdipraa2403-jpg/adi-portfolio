@@ -437,8 +437,10 @@
                         class="home-certificate-preview"
                     >
 
+                        {{-- FIX: sertifikat menggunakan public/assets/certificates --}}
+
                         <img
-                            src="{{ asset('storage/certificates/' . $certificate['image']) }}"
+                            src="{{ asset('assets/certificates/' . $certificate['image']) }}"
                             alt="{{ $certificate['title'] }}"
                             loading="lazy"
                         >
