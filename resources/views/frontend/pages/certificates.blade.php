@@ -11,13 +11,14 @@
 ])
 
 @php
+
     /*
     |--------------------------------------------------------------------------
     | Mapping Preview Sertifikat
     |--------------------------------------------------------------------------
     |
-    | Semua gambar berada di:
-    | storage/app/public/certificates/
+    | Semua gambar sertifikat untuk production disimpan di:
+    | public/assets/certificates/
     |
     */
 
@@ -25,39 +26,39 @@
 
         // 1. JavaScript
         'sertifikat_belajar_dasprog_javascript'
-            => 'certificates/sertifikat_belajar_dasprog_javascript.png',
+            => 'assets/certificates/sertifikat_belajar_dasprog_javascript.png',
 
         // 2. DQLAB
         'certificate-dqlab'
-            => 'certificates/certificate-DQLAB.png',
+            => 'assets/certificates/certificate-DQLAB.png',
 
         // 3. Dasar Pemrograman
         'sertifikat_coding_belajar_dasar_pemrograman'
-            => 'certificates/sertifikat-coding.png',
+            => 'assets/certificates/sertifikat-coding.png',
 
         // 4. Financial Literacy
         'introduction_to_financial_literacy'
-            => 'certificates/sertifikat-financial-literacy.png',
+            => 'assets/certificates/sertifikat-financial-literacy.png',
 
         // 5. Database MySQL
         'database_mysql_tingkat_dasar'
-            => 'certificates/sertifikat-mysql.png',
+            => 'assets/certificates/sertifikat-mysql.png',
 
         // 6. Front End
         'sertifikat_membuat_front_end'
-            => 'certificates/sertifikat-frontend.png',
+            => 'assets/certificates/sertifikat-frontend.png',
 
         // 7. Software Quality Assurance
         'sertifikat_software_quality_assurance_basic_level'
-            => 'certificates/sertifikat-sqa-basic-level.png',
+            => 'assets/certificates/sertifikat-sqa-basic-level.png',
 
         // 8. Database Administrator
         'sertifikat_database_administrator'
-            => 'certificates/sertifikat-database-administrator.png',
+            => 'assets/certificates/sertifikat-database-administrator.png',
 
         // 9. Sosial dan Media II
         'sertifikat_sosial_dan_media_ii'
-            => 'certificates/sertifikat-sosial-media-ii.png',
+            => 'assets/certificates/sertifikat-sosial-media-ii.png',
     ];
 
 
@@ -66,12 +67,12 @@
     | Normalisasi Nama
     |--------------------------------------------------------------------------
     |
-    | Supaya nama seperti:
+    | Contoh:
     | "Sertifikat Database Administrator"
     | "sertifikat_database_administrator"
     | "sertifikat-database-administrator"
     |
-    | tetap dianggap sama.
+    | akan dianggap sama.
     |
     */
 
@@ -93,7 +94,7 @@
 
     /*
     |--------------------------------------------------------------------------
-    | Buat mapping yang sudah dinormalisasi
+    | Buat Mapping yang Sudah Dinormalisasi
     |--------------------------------------------------------------------------
     */
 
@@ -102,6 +103,7 @@
     foreach ($previewMap as $name => $path) {
         $normalizedPreviewMap[$normalize($name)] = $path;
     }
+
 @endphp
 
 
@@ -119,7 +121,7 @@
 
                         /*
                         |--------------------------------------------------------------------------
-                        | Cari gambar preview
+                        | Cari gambar preview berdasarkan nama sertifikat
                         |--------------------------------------------------------------------------
                         */
 
@@ -130,8 +132,32 @@
 
                         /*
                         |--------------------------------------------------------------------------
-                        | File sertifikat asli
+                        | URL Preview
                         |--------------------------------------------------------------------------
+                        |
+                        | Sekarang menggunakan:
+                        | public/assets/certificates/
+                        |
+                        | sehingga URL menjadi:
+                        | /assets/certificates/nama-file.png
+                        |
+                        */
+
+                        $previewUrl = $previewPath
+                            ? asset($previewPath)
+                            : null;
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | File Sertifikat Asli
+                        |--------------------------------------------------------------------------
+                        |
+                        | Kalau database menyimpan URL eksternal, tetap gunakan.
+                        |
+                        | Kalau menyimpan file lokal storage, kita tetap siapkan
+                        | URL storage sebagai fallback.
+                        |
                         */
 
                         $fileUrl = null;
@@ -140,8 +166,9 @@
 
                             $filePath = ltrim($item->file, '/');
 
+
                             /*
-                            | Jika file berupa URL
+                            | File berupa URL langsung
                             */
 
                             if (
@@ -156,11 +183,7 @@
                             } else {
 
                                 /*
-                                | Jika database menyimpan:
-                                | storage/certificates/...
-                                |
-                                | hapus "storage/" agar tidak menjadi:
-                                | storage/storage/...
+                                | Hilangkan storage/ jika database menyimpannya
                                 */
 
                                 if (
@@ -176,6 +199,11 @@
                                     );
                                 }
 
+
+                                /*
+                                | URL storage Laravel
+                                */
+
                                 $fileUrl = asset(
                                     'storage/' . $filePath
                                 );
@@ -185,13 +213,15 @@
 
                         /*
                         |--------------------------------------------------------------------------
-                        | URL Preview
+                        | Link utama
                         |--------------------------------------------------------------------------
+                        |
+                        | Kalau file asli tersedia → gunakan file asli.
+                        | Kalau tidak → gunakan gambar preview.
+                        |
                         */
 
-                        $previewUrl = $previewPath
-                            ? asset('storage/' . $previewPath)
-                            : null;
+                        $certificateLink = $fileUrl ?? $previewUrl;
 
                     @endphp
 
@@ -199,13 +229,13 @@
                     <article class="certificate-card">
 
                         {{-- =========================================================
-                             PREVIEW SERTIFIKAT
+                            PREVIEW SERTIFIKAT
                         ========================================================== --}}
 
                         @if($previewUrl)
 
                             <a
-                                href="{{ $fileUrl ?? $previewUrl }}"
+                                href="{{ $certificateLink }}"
                                 class="certificate-preview certificate-preview-image"
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -228,7 +258,7 @@
                         @elseif($fileUrl)
 
                             {{-- =====================================================
-                                 FALLBACK PDF
+                                FALLBACK FILE / PDF
                             ====================================================== --}}
 
                             <a
@@ -254,7 +284,7 @@
                         @else
 
                             {{-- =====================================================
-                                 JIKA PREVIEW DAN FILE TIDAK ADA
+                                JIKA PREVIEW DAN FILE TIDAK ADA
                             ====================================================== --}}
 
                             <div class="certificate-preview">
@@ -275,7 +305,7 @@
 
 
                         {{-- =========================================================
-                             INFORMASI SERTIFIKAT
+                            INFORMASI SERTIFIKAT
                         ========================================================== --}}
 
                         <div class="certificate-body">
@@ -317,17 +347,16 @@
                             @endif
 
 
-                            @if($fileUrl)
+                            @if($certificateLink)
 
                                 <a
-                                    href="{{ $fileUrl }}"
+                                    href="{{ $certificateLink }}"
                                     class="certificate-link"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
                                     Buka Sertifikat ↗
                                 </a>
-
 
                             @elseif($item->credential_url)
 
@@ -354,7 +383,7 @@
         @else
 
             {{-- =============================================================
-                 EMPTY STATE
+                EMPTY STATE
             ============================================================== --}}
 
             <div class="empty-state">
@@ -382,269 +411,269 @@
 
 <style>
 
-    /*
-    |--------------------------------------------------------------------------
-    | Certificate Preview
-    |--------------------------------------------------------------------------
-    */
+/*
+|--------------------------------------------------------------------------
+| Certificate Preview
+|--------------------------------------------------------------------------
+*/
+
+.certificate-preview {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+    min-height: 280px;
+
+    overflow: hidden;
+
+    background: #f5f0e8;
+
+    text-decoration: none;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Certificate Image
+|--------------------------------------------------------------------------
+*/
+
+.certificate-preview-image img {
+
+    display: block;
+
+    width: 100%;
+
+    height: 280px;
+
+    object-fit: contain;
+
+    object-position: center;
+
+    background: #f5f0e8;
+
+    transition: transform .35s ease;
+}
+
+
+.certificate-preview-image:hover img {
+
+    transform: scale(1.02);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Hover Overlay
+|--------------------------------------------------------------------------
+*/
+
+.certificate-preview-overlay {
+
+    position: absolute;
+
+    left: 0;
+
+    right: 0;
+
+    bottom: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 18px;
+
+    background: linear-gradient(
+        to top,
+        rgba(30, 25, 20, .72),
+        rgba(30, 25, 20, 0)
+    );
+
+    color: #fff;
+
+    font-size: .82rem;
+
+    font-weight: 600;
+
+    opacity: 0;
+
+    transform: translateY(8px);
+
+    transition: .25s ease;
+}
+
+
+.certificate-preview-image:hover
+.certificate-preview-overlay {
+
+    opacity: 1;
+
+    transform: translateY(0);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Broken Image Fallback
+|--------------------------------------------------------------------------
+*/
+
+.certificate-image-error {
+
+    background: #f5f0e8;
+}
+
+
+.certificate-image-error::after {
+
+    content: 'Preview belum tersedia';
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+    height: 280px;
+
+    color: #675f54;
+
+    font-size: .82rem;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| PDF / Empty Placeholder
+|--------------------------------------------------------------------------
+*/
+
+.certificate-preview-placeholder {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    width: 100%;
+
+    min-height: 280px;
+
+    color: #675f54;
+
+    background: #f5f0e8;
+}
+
+
+.certificate-preview-placeholder strong {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 64px;
+
+    height: 64px;
+
+    border: 1px solid rgba(103, 95, 84, .2);
+
+    border-radius: 50%;
+
+    font-size: 1rem;
+}
+
+
+.certificate-preview-placeholder span {
+
+    font-size: .8rem;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Certificate Body
+|--------------------------------------------------------------------------
+*/
+
+.certificate-body {
+
+    min-height: 160px;
+}
+
+
+.certificate-body h3 {
+
+    line-height: 1.25;
+
+    margin-bottom: 8px;
+}
+
+
+.certificate-body p {
+
+    margin-bottom: 8px;
+}
+
+
+.certificate-body > span {
+
+    display: block;
+
+    margin-bottom: 5px;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Responsive
+|--------------------------------------------------------------------------
+*/
+
+@media (max-width: 768px) {
 
     .certificate-preview {
 
-        position: relative;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        width: 100%;
-
-        min-height: 280px;
-
-        overflow: hidden;
-
-        background: #f5f0e8;
-
-        text-decoration: none;
+        min-height: 220px;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Certificate Image
-    |--------------------------------------------------------------------------
-    */
 
     .certificate-preview-image img {
 
-        display: block;
-
-        width: 100%;
-
-        height: 280px;
-
-        object-fit: contain;
-
-        object-position: center;
-
-        background: #f5f0e8;
-
-        transition: transform .35s ease;
+        height: 220px;
     }
 
 
-    .certificate-preview-image:hover img {
+    .certificate-preview-placeholder {
 
-        transform: scale(1.02);
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Hover Overlay
-    |--------------------------------------------------------------------------
-    */
-
-    .certificate-preview-overlay {
-
-        position: absolute;
-
-        left: 0;
-
-        right: 0;
-
-        bottom: 0;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        padding: 18px;
-
-        background: linear-gradient(
-            to top,
-            rgba(30, 25, 20, .72),
-            rgba(30, 25, 20, 0)
-        );
-
-        color: #fff;
-
-        font-size: .82rem;
-
-        font-weight: 600;
-
-        opacity: 0;
-
-        transform: translateY(8px);
-
-        transition: .25s ease;
-    }
-
-
-    .certificate-preview-image:hover
-    .certificate-preview-overlay {
-
-        opacity: 1;
-
-        transform: translateY(0);
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Broken Image Fallback
-    |--------------------------------------------------------------------------
-    */
-
-    .certificate-image-error {
-
-        background: #f5f0e8;
+        min-height: 220px;
     }
 
 
     .certificate-image-error::after {
 
-        content: 'Preview belum tersedia';
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        width: 100%;
-
-        height: 280px;
-
-        color: #675f54;
-
-        font-size: .82rem;
+        height: 220px;
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | PDF / Empty Placeholder
-    |--------------------------------------------------------------------------
-    */
-
-    .certificate-preview-placeholder {
-
-        display: flex;
-
-        flex-direction: column;
-
-        align-items: center;
-
-        justify-content: center;
-
-        gap: 10px;
-
-        width: 100%;
-
-        min-height: 280px;
-
-        color: #675f54;
-
-        background: #f5f0e8;
-    }
-
-
-    .certificate-preview-placeholder strong {
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        width: 64px;
-
-        height: 64px;
-
-        border: 1px solid rgba(103, 95, 84, .2);
-
-        border-radius: 50%;
-
-        font-size: 1rem;
-    }
-
-
-    .certificate-preview-placeholder span {
-
-        font-size: .8rem;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Certificate Body
-    |--------------------------------------------------------------------------
-    */
-
-    .certificate-body {
-
-        min-height: 160px;
-    }
-
-
-    .certificate-body h3 {
-
-        line-height: 1.25;
-
-        margin-bottom: 8px;
-    }
-
-
-    .certificate-body p {
-
-        margin-bottom: 8px;
-    }
-
-
-    .certificate-body > span {
-
-        display: block;
-
-        margin-bottom: 5px;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Responsive
-    |--------------------------------------------------------------------------
-    */
-
-    @media (max-width: 768px) {
-
-        .certificate-preview {
-
-            min-height: 220px;
-        }
-
-
-        .certificate-preview-image img {
-
-            height: 220px;
-        }
-
-
-        .certificate-preview-placeholder {
-
-            min-height: 220px;
-        }
-
-
-        .certificate-image-error::after {
-
-            height: 220px;
-        }
-
-    }
+}
 
 </style>
 
