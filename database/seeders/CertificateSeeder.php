@@ -12,8 +12,12 @@ class CertificateSeeder extends Seeder
         // Hapus seluruh data sertifikat lama agar tidak terjadi duplikat.
         DB::table('certificates')->truncate();
 
-        // Masukkan 9 sertifikat.
+        // Masukkan 12 sertifikat.
         DB::table('certificates')->insert([
+
+            // =========================================================
+            // 1. JavaScript
+            // =========================================================
             [
                 'name' => 'sertifikat_belajar dasprog_javascript',
                 'issuer' => 'Coding Camp Power by DBS Foundation',
@@ -29,6 +33,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 2. DQLAB
+            // =========================================================
             [
                 'name' => 'certificate-DQLAB',
                 'issuer' => 'DQLAB',
@@ -44,6 +51,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 3. Dasar Pemrograman
+            // =========================================================
             [
                 'name' => 'sertifikat_coding,belajar dasar pemrograman',
                 'issuer' => 'Coding Camp Power by DBS Foundation',
@@ -59,6 +69,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 4. Introduction to Financial Literacy
+            // =========================================================
             [
                 'name' => 'Introduction to Financial Literacy',
                 'issuer' => 'Coding Camp Power by DBS Foundation',
@@ -74,6 +87,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 5. Database MySQL
+            // =========================================================
             [
                 'name' => 'Database MySQL (Tingkat Dasar)',
                 'issuer' => 'PT Nimcomlab Teknologi Indonesia',
@@ -89,6 +105,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 6. Front End
+            // =========================================================
             [
                 'name' => 'sertifikat membuat Front End',
                 'issuer' => 'Coding Camp Power by DBS Foundation',
@@ -104,6 +123,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 7. Software Quality Assurance
+            // =========================================================
             [
                 'name' => 'Sertifikat_Software Quality Assurance Basic Level',
                 'issuer' => 'PT Nimcomlab Teknologi Indonesia',
@@ -119,6 +141,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 8. Database Administrator
+            // =========================================================
             [
                 'name' => 'Sertifikat Database Administrator',
                 'issuer' => 'LSP Universitas Bina Sarana Informatika',
@@ -134,6 +159,9 @@ class CertificateSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
+            // =========================================================
+            // 9. Sosial dan Media II
+            // =========================================================
             [
                 'name' => 'Sertifikat Sosial dan Media II',
                 'issuer' => 'UKM Kerohanian Islam UBSI Kampus Kota Tegal',
@@ -145,6 +173,60 @@ class CertificateSeeder extends Seeder
                 'description' => 'Sertifikat kegiatan Sosial dan Media II sebagai bagian dari aktivitas dan pengembangan pengalaman organisasi di UKM Kerohanian Islam UBSI Kampus Kota Tegal.',
                 'is_active' => true,
                 'sort_order' => 9,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // =========================================================
+            // 10. Memulai Pemrograman dengan Python
+            // =========================================================
+            [
+                'name' => 'Memulai Pemrograman dengan Python',
+                'issuer' => 'Dicoding',
+                'issued_at' => '2026-09-23',
+                'credential_id' => 'KEXLMLDMRZG2',
+                'credential_url' => null,
+                'image' => 'assets/certificates/sertifikat-pemrograman-python.png',
+                'file' => 'assets/certificates/sertifikat-pemrograman-python.pdf',
+                'description' => 'Sertifikat kelulusan kelas Memulai Pemrograman dengan Python.',
+                'is_active' => true,
+                'sort_order' => 10,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // =========================================================
+            // 11. Belajar Dasar Cloud dan Gen AI di AWS
+            // =========================================================
+            [
+                'name' => 'Belajar Dasar Cloud dan Gen AI di AWS',
+                'issuer' => 'Dicoding',
+                'issued_at' => '2026-09-22',
+                'credential_id' => '07Z6Q8E8RZQR',
+                'credential_url' => null,
+                'image' => 'assets/certificates/sertifikat-dasar-cloud-gen-ai-aws.png',
+                'file' => 'assets/certificates/sertifikat-dasar-cloud-gen-ai-aws.pdf',
+                'description' => 'Sertifikat kelulusan kelas Belajar Dasar Cloud dan Gen AI di AWS.',
+                'is_active' => true,
+                'sort_order' => 11,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // =========================================================
+            // 12. Spec-Driven Development dengan Kiro
+            // =========================================================
+            [
+                'name' => 'Spec-Driven Development dengan Kiro',
+                'issuer' => 'Dicoding',
+                'issued_at' => '2026-09-22',
+                'credential_id' => 'N9ZO05QV8XG5',
+                'credential_url' => null,
+                'image' => 'assets/certificates/sertifikat-spec-driven-development-kiro.png',
+                'file' => 'assets/certificates/sertifikat-spec-driven-development-kiro.pdf',
+                'description' => 'Sertifikat kelulusan kelas Spec-Driven Development dengan Kiro.',
+                'is_active' => true,
+                'sort_order' => 12,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

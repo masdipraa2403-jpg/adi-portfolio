@@ -4,22 +4,11 @@
 
 @section('content')
 
-@include('frontend.partials.page-hero', [
-    'kicker' => 'Certificates',
-    'title' => 'Bukti <span>pembelajaran.</span>',
-    'description' => 'Sertifikat dan pencapaian yang menjadi bagian dari proses belajar dan pengembangan diri.'
-])
-
 @php
-
     /*
     |--------------------------------------------------------------------------
-    | Mapping Preview Sertifikat
+    | Mapping nama sertifikat ke gambar preview
     |--------------------------------------------------------------------------
-    |
-    | Semua gambar sertifikat untuk production disimpan di:
-    | public/assets/certificates/
-    |
     */
 
     $previewMap = [
@@ -40,7 +29,7 @@
         'introduction_to_financial_literacy'
             => 'assets/certificates/sertifikat-financial-literacy.png',
 
-        // 5. Database MySQL
+        // 5. MySQL
         'database_mysql_tingkat_dasar'
             => 'assets/certificates/sertifikat-mysql.png',
 
@@ -48,7 +37,7 @@
         'sertifikat_membuat_front_end'
             => 'assets/certificates/sertifikat-frontend.png',
 
-        // 7. Software Quality Assurance
+        // 7. SQA
         'sertifikat_software_quality_assurance_basic_level'
             => 'assets/certificates/sertifikat-sqa-basic-level.png',
 
@@ -59,25 +48,27 @@
         // 9. Sosial dan Media II
         'sertifikat_sosial_dan_media_ii'
             => 'assets/certificates/sertifikat-sosial-media-ii.png',
-    ];
 
+        // 10. Python
+        'memulai_pemrograman_dengan_python'
+            => 'assets/certificates/sertifikat-pemrograman-python.png',
+
+        // 11. Cloud & Gen AI AWS
+        'belajar_dasar_cloud_dan_gen_ai_di_aws'
+            => 'assets/certificates/sertifikat-dasar-cloud-gen-ai-aws.png',
+
+        // 12. Spec-Driven Development Kiro
+        'spec_driven_development_dengan_kiro'
+            => 'assets/certificates/sertifikat-spec-driven-development-kiro.png',
+    ];
 
     /*
     |--------------------------------------------------------------------------
-    | Normalisasi Nama
+    | Fungsi normalisasi nama
     |--------------------------------------------------------------------------
-    |
-    | Contoh:
-    | "Sertifikat Database Administrator"
-    | "sertifikat_database_administrator"
-    | "sertifikat-database-administrator"
-    |
-    | akan dianggap sama.
-    |
     */
 
     $normalize = function ($value) {
-
         $value = strtolower(trim((string) $value));
 
         $value = str_replace(
@@ -91,238 +82,142 @@
         return trim($value);
     };
 
-
     /*
     |--------------------------------------------------------------------------
-    | Buat Mapping yang Sudah Dinormalisasi
+    | Cari gambar preview
     |--------------------------------------------------------------------------
     */
 
-    $normalizedPreviewMap = [];
+    $getPreview = function ($certificate) use ($previewMap, $normalize) {
 
-    foreach ($previewMap as $name => $path) {
-        $normalizedPreviewMap[$normalize($name)] = $path;
-    }
+        $name = $normalize($certificate->name);
 
+        foreach ($previewMap as $key => $image) {
+
+            $normalizedKey = $normalize($key);
+
+            if ($name === $normalizedKey) {
+                return asset($image);
+            }
+        }
+
+        /*
+        | Kalau tidak ketemu berdasarkan nama,
+        | gunakan kolom image dari database.
+        */
+
+        if (!empty($certificate->image)) {
+
+            $image = ltrim($certificate->image, '/');
+
+            return asset($image);
+        }
+
+        return null;
+    };
+
+    /*
+    |--------------------------------------------------------------------------
+    | Link file sertifikat
+    |--------------------------------------------------------------------------
+    */
+
+    $getCertificateLink = function ($certificate) {
+
+        if (!empty($certificate->file)) {
+
+            $file = ltrim($certificate->file, '/');
+
+            return asset($file);
+        }
+
+        if (!empty($certificate->credential_url)) {
+            return $certificate->credential_url;
+        }
+
+        return null;
+    };
 @endphp
 
 
-<section class="section section-paper">
+<section class="page-hero">
+    <div class="container">
 
+        <span class="eyebrow">
+            Certificates
+        </span>
+
+        <h1>
+            Sertifikat &amp; Pencapaian
+        </h1>
+
+        <p>
+            Kumpulan sertifikat yang diperoleh dari berbagai kegiatan
+            pembelajaran, pelatihan, dan pengembangan kompetensi.
+        </p>
+
+    </div>
+</section>
+
+
+<section class="section">
     <div class="container">
 
         @if($certificates->count())
 
-            <div class="certificate-grid">
+            <div class="certificates-grid">
 
                 @foreach($certificates as $item)
 
                     @php
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Cari gambar preview berdasarkan nama sertifikat
-                        |--------------------------------------------------------------------------
-                        */
-
-                        $certificateName = $normalize($item->name ?? '');
-
-                        $previewPath = $normalizedPreviewMap[$certificateName] ?? null;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | URL Preview
-                        |--------------------------------------------------------------------------
-                        |
-                        | Sekarang menggunakan:
-                        | public/assets/certificates/
-                        |
-                        | sehingga URL menjadi:
-                        | /assets/certificates/nama-file.png
-                        |
-                        */
-
-                        $previewUrl = $previewPath
-                            ? asset($previewPath)
-                            : null;
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | File Sertifikat Asli
-                        |--------------------------------------------------------------------------
-                        |
-                        | Kalau database menyimpan URL eksternal, tetap gunakan.
-                        |
-                        | Kalau menyimpan file lokal storage, kita tetap siapkan
-                        | URL storage sebagai fallback.
-                        |
-                        */
-
-                        $fileUrl = null;
-
-                        if ($item->file) {
-
-                            $filePath = ltrim($item->file, '/');
-
-
-                            /*
-                            | File berupa URL langsung
-                            */
-
-                            if (
-                                \Illuminate\Support\Str::startsWith(
-                                    $filePath,
-                                    ['http://', 'https://']
-                                )
-                            ) {
-
-                                $fileUrl = $filePath;
-
-                            } else {
-
-                                /*
-                                | Hilangkan storage/ jika database menyimpannya
-                                */
-
-                                if (
-                                    \Illuminate\Support\Str::startsWith(
-                                        $filePath,
-                                        'storage/'
-                                    )
-                                ) {
-
-                                    $filePath = substr(
-                                        $filePath,
-                                        strlen('storage/')
-                                    );
-                                }
-
-
-                                /*
-                                | URL storage Laravel
-                                */
-
-                                $fileUrl = asset(
-                                    'storage/' . $filePath
-                                );
-                            }
-                        }
-
-
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Link utama
-                        |--------------------------------------------------------------------------
-                        |
-                        | Kalau file asli tersedia → gunakan file asli.
-                        | Kalau tidak → gunakan gambar preview.
-                        |
-                        */
-
-                        $certificateLink = $fileUrl ?? $previewUrl;
-
+                        $previewUrl = $getPreview($item);
+                        $certificateLink = $getCertificateLink($item);
                     @endphp
-
 
                     <article class="certificate-card">
 
-                        {{-- =========================================================
-                            PREVIEW SERTIFIKAT
-                        ========================================================== --}}
+                        {{-- =====================================================
+                             GAMBAR SERTIFIKAT
+                        ====================================================== --}}
 
-                        @if($previewUrl)
+                        <div class="certificate-image">
 
-                            <a
-                                href="{{ $certificateLink }}"
-                                class="certificate-preview certificate-preview-image"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
+                            @if($previewUrl)
 
                                 <img
                                     src="{{ $previewUrl }}"
                                     alt="{{ $item->name }}"
                                     loading="lazy"
-                                    onerror="this.style.display='none'; this.parentElement.classList.add('certificate-image-error');"
                                 >
 
-                                <span class="certificate-preview-overlay">
-                                    Lihat Sertifikat ↗
-                                </span>
+                            @else
 
-                            </a>
-
-
-                        @elseif($fileUrl)
-
-                            {{-- =====================================================
-                                FALLBACK FILE / PDF
-                            ====================================================== --}}
-
-                            <a
-                                href="{{ $fileUrl }}"
-                                class="certificate-preview"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-
-                                <div class="certificate-preview-placeholder">
-
-                                    <strong>PDF</strong>
-
-                                    <span>
-                                        Buka Sertifikat ↗
-                                    </span>
-
+                                <div class="certificate-placeholder">
+                                    <span>Certificate</span>
                                 </div>
 
-                            </a>
+                            @endif
+
+                        </div>
 
 
-                        @else
+                        {{-- =====================================================
+                             INFORMASI SERTIFIKAT
+                        ====================================================== --}}
 
-                            {{-- =====================================================
-                                JIKA PREVIEW DAN FILE TIDAK ADA
-                            ====================================================== --}}
+                        <div class="certificate-content">
 
-                            <div class="certificate-preview">
+                            <span class="certificate-number">
+                                Certificate {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                            </span>
 
-                                <div class="certificate-preview-placeholder">
-
-                                    <strong>✦</strong>
-
-                                    <span>
-                                        Preview belum tersedia
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        @endif
-
-
-                        {{-- =========================================================
-                            INFORMASI SERTIFIKAT
-                        ========================================================== --}}
-
-                        <div class="certificate-body">
-
-                            <div class="certificate-icon">
-                                ✦
-                            </div>
-
-
-                            <h3>
+                            <h2>
                                 {{ $item->name }}
-                            </h3>
-
+                            </h2>
 
                             @if($item->issuer)
 
-                                <p>
+                                <p class="certificate-issuer">
                                     {{ $item->issuer }}
                                 </p>
 
@@ -331,42 +226,53 @@
 
                             @if($item->issued_at)
 
-                                <span>
+                                <p class="certificate-date">
                                     {{ $item->issued_at }}
-                                </span>
+                                </p>
+
+                            @endif
+
+
+                            @if($item->description)
+
+                                <p class="certificate-description">
+                                    {{ $item->description }}
+                                </p>
 
                             @endif
 
 
                             @if($item->credential_id)
 
-                                <span>
-                                    Credential: {{ $item->credential_id }}
-                                </span>
+                                <div class="certificate-credential">
+
+                                    <span>
+                                        Credential ID
+                                    </span>
+
+                                    <strong>
+                                        {{ $item->credential_id }}
+                                    </strong>
+
+                                </div>
 
                             @endif
 
+
+                            {{-- =================================================
+                                 TOMBOL
+                            ================================================== --}}
 
                             @if($certificateLink)
 
                                 <a
                                     href="{{ $certificateLink }}"
-                                    class="certificate-link"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    class="certificate-button"
                                 >
-                                    Buka Sertifikat ↗
-                                </a>
-
-                            @elseif($item->credential_url)
-
-                                <a
-                                    href="{{ $item->credential_url }}"
-                                    class="certificate-link"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Lihat Credential ↗
+                                    Buka File Sertifikat
+                                    <span>↗</span>
                                 </a>
 
                             @endif
@@ -379,25 +285,17 @@
 
             </div>
 
-
         @else
-
-            {{-- =============================================================
-                EMPTY STATE
-            ============================================================== --}}
 
             <div class="empty-state">
 
-                <div class="empty-icon">
-                    ✦
-                </div>
-
-                <h3>
-                    Sertifikat segera hadir
-                </h3>
+                <h2>
+                    Belum ada sertifikat
+                </h2>
 
                 <p>
-                    Belum ada sertifikat yang dipublikasikan.
+                    Sertifikat akan ditampilkan di halaman ini setelah
+                    data ditambahkan.
                 </p>
 
             </div>
@@ -405,276 +303,6 @@
         @endif
 
     </div>
-
 </section>
-
-
-<style>
-
-/*
-|--------------------------------------------------------------------------
-| Certificate Preview
-|--------------------------------------------------------------------------
-*/
-
-.certificate-preview {
-
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    width: 100%;
-
-    min-height: 280px;
-
-    overflow: hidden;
-
-    background: #f5f0e8;
-
-    text-decoration: none;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Certificate Image
-|--------------------------------------------------------------------------
-*/
-
-.certificate-preview-image img {
-
-    display: block;
-
-    width: 100%;
-
-    height: 280px;
-
-    object-fit: contain;
-
-    object-position: center;
-
-    background: #f5f0e8;
-
-    transition: transform .35s ease;
-}
-
-
-.certificate-preview-image:hover img {
-
-    transform: scale(1.02);
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Hover Overlay
-|--------------------------------------------------------------------------
-*/
-
-.certificate-preview-overlay {
-
-    position: absolute;
-
-    left: 0;
-
-    right: 0;
-
-    bottom: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 18px;
-
-    background: linear-gradient(
-        to top,
-        rgba(30, 25, 20, .72),
-        rgba(30, 25, 20, 0)
-    );
-
-    color: #fff;
-
-    font-size: .82rem;
-
-    font-weight: 600;
-
-    opacity: 0;
-
-    transform: translateY(8px);
-
-    transition: .25s ease;
-}
-
-
-.certificate-preview-image:hover
-.certificate-preview-overlay {
-
-    opacity: 1;
-
-    transform: translateY(0);
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Broken Image Fallback
-|--------------------------------------------------------------------------
-*/
-
-.certificate-image-error {
-
-    background: #f5f0e8;
-}
-
-
-.certificate-image-error::after {
-
-    content: 'Preview belum tersedia';
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    width: 100%;
-
-    height: 280px;
-
-    color: #675f54;
-
-    font-size: .82rem;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| PDF / Empty Placeholder
-|--------------------------------------------------------------------------
-*/
-
-.certificate-preview-placeholder {
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 10px;
-
-    width: 100%;
-
-    min-height: 280px;
-
-    color: #675f54;
-
-    background: #f5f0e8;
-}
-
-
-.certificate-preview-placeholder strong {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    width: 64px;
-
-    height: 64px;
-
-    border: 1px solid rgba(103, 95, 84, .2);
-
-    border-radius: 50%;
-
-    font-size: 1rem;
-}
-
-
-.certificate-preview-placeholder span {
-
-    font-size: .8rem;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Certificate Body
-|--------------------------------------------------------------------------
-*/
-
-.certificate-body {
-
-    min-height: 160px;
-}
-
-
-.certificate-body h3 {
-
-    line-height: 1.25;
-
-    margin-bottom: 8px;
-}
-
-
-.certificate-body p {
-
-    margin-bottom: 8px;
-}
-
-
-.certificate-body > span {
-
-    display: block;
-
-    margin-bottom: 5px;
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Responsive
-|--------------------------------------------------------------------------
-*/
-
-@media (max-width: 768px) {
-
-    .certificate-preview {
-
-        min-height: 220px;
-    }
-
-
-    .certificate-preview-image img {
-
-        height: 220px;
-    }
-
-
-    .certificate-preview-placeholder {
-
-        min-height: 220px;
-    }
-
-
-    .certificate-image-error::after {
-
-        height: 220px;
-    }
-
-}
-
-</style>
 
 @endsection
