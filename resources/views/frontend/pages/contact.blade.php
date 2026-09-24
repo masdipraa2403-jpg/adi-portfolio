@@ -14,7 +14,9 @@
             <p>Sampaikan kebutuhan atau ide project kamu. Pesan akan masuk langsung ke dashboard admin portfolio.</p>
 
             <div class="contact-points">
-                <div><span>✉</span><div><small>Email</small><b>admin@adiprasetyo.dev</b></div></div>
+                <div><span>✉</span><div><small>Email</small><b>masdipraa2403@gmail.com</b></div></div>
+                <div><span>⌁</span><div><small>WhatsApp</small><b>083895786587</b></div></div>
+                <div><span>⌁</span><div><small>Instagram</small><b>@masdipraaaprsty24</b></div></div>
                 <div><span>⌁</span><div><small>Fokus</small><b>Web · Design · Editing</b></div></div>
                 <div><span>↗</span><div><small>Response</small><b>Pesan dibaca melalui dashboard</b></div></div>
             </div>

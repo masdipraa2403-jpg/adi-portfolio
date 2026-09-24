@@ -40,9 +40,12 @@ class ContentController extends Controller
         $query = $class::query();
 
         if ($type === 'projects') {
-            $query->orderByDesc('is_featured')
-                ->orderBy('sort_order')
-                ->latest();
+            /*
+             * Project lama tampil lebih dulu.
+             * Project yang baru ditambahkan otomatis berada di bawah.
+             */
+            $query->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc');
         } elseif ($type === 'messages') {
             $query->latest();
         } else {
@@ -69,11 +72,13 @@ class ContentController extends Controller
     public function store(Request $request, string $type)
     {
         $class = $this->model($type);
+
         abort_if($type === 'messages', 403);
 
         $data = $this->validateData($request, $type);
 
         $data['is_active'] = $request->boolean('is_active');
+
         $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
 
         if ($type === 'projects') {
@@ -81,7 +86,9 @@ class ContentController extends Controller
         }
 
         if ($type === 'certificates' && $request->hasFile('file')) {
-            $data['file'] = $request->file('file')->store('certificates', 'public');
+            $data['file'] = $request
+                ->file('file')
+                ->store('certificates', 'public');
         }
 
         $class::create($data);
@@ -94,32 +101,55 @@ class ContentController extends Controller
     public function edit(string $type, int $id)
     {
         $class = $this->model($type);
+
         $item = $class::findOrFail($id);
 
         return view('admin.content.form', compact('item', 'type'));
     }
 
-    public function update(Request $request, string $type, int $id)
-    {
+    public function update(
+        Request $request,
+        string $type,
+        int $id
+    ) {
         $class = $this->model($type);
+
         abort_if($type === 'messages', 403);
 
         $item = $class::findOrFail($id);
-        $data = $this->validateData($request, $type, $item->id);
+
+        $data = $this->validateData(
+            $request,
+            $type,
+            $item->id
+        );
 
         $data['is_active'] = $request->boolean('is_active');
-        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+
+        $data['sort_order'] = (int) (
+            $data['sort_order'] ?? 0
+        );
 
         if ($type === 'projects') {
             $data['is_featured'] = $request->boolean('is_featured');
         }
 
-        if ($type === 'certificates' && $request->hasFile('file')) {
-            if ($item->file && Storage::disk('public')->exists($item->file)) {
-                Storage::disk('public')->delete($item->file);
+        if (
+            $type === 'certificates'
+            && $request->hasFile('file')
+        ) {
+            if (
+                $item->file
+                && Storage::disk('public')->exists($item->file)
+            ) {
+                Storage::disk('public')->delete(
+                    $item->file
+                );
             }
 
-            $data['file'] = $request->file('file')->store('certificates', 'public');
+            $data['file'] = $request
+                ->file('file')
+                ->store('certificates', 'public');
         }
 
         $item->update($data);
@@ -132,116 +162,395 @@ class ContentController extends Controller
     public function destroy(string $type, int $id)
     {
         $class = $this->model($type);
+
         abort_if($type === 'messages', 403);
 
         $item = $class::findOrFail($id);
 
-        if ($type === 'certificates' && $item->file && Storage::disk('public')->exists($item->file)) {
-            Storage::disk('public')->delete($item->file);
+        if (
+            $type === 'certificates'
+            && $item->file
+            && Storage::disk('public')->exists($item->file)
+        ) {
+            Storage::disk('public')->delete(
+                $item->file
+            );
         }
 
         $item->delete();
 
-        return back()->with('success', 'Data berhasil dihapus.');
+        return back()->with(
+            'success',
+            'Data berhasil dihapus.'
+        );
     }
 
     public function readMessage(int $id)
     {
-        ContactMessage::findOrFail($id)->update(['is_read' => true]);
+        ContactMessage::findOrFail($id)
+            ->update([
+                'is_read' => true,
+            ]);
 
-        return back()->with('success', 'Pesan ditandai sudah dibaca.');
+        return back()->with(
+            'success',
+            'Pesan ditandai sudah dibaca.'
+        );
     }
 
-    private function validateData(Request $request, string $type, ?int $ignore = null): array
-    {
+    private function validateData(
+        Request $request,
+        string $type,
+        ?int $ignore = null
+    ): array {
         return match ($type) {
+
             'educations' => $request->validate([
-                'institution' => ['required', 'string', 'max:255'],
-                'major' => ['nullable', 'string', 'max:255'],
-                'start_year' => ['nullable', 'string', 'max:10'],
-                'end_year' => ['nullable', 'string', 'max:10'],
-                'description' => ['nullable', 'string'],
-                'is_active' => ['nullable', 'boolean'],
-                'sort_order' => ['nullable', 'integer', 'min:0'],
+                'institution' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'major' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'start_year' => [
+                    'nullable',
+                    'string',
+                    'max:10',
+                ],
+
+                'end_year' => [
+                    'nullable',
+                    'string',
+                    'max:10',
+                ],
+
+                'description' => [
+                    'nullable',
+                    'string',
+                ],
+
+                'is_active' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'sort_order' => [
+                    'nullable',
+                    'integer',
+                    'min:0',
+                ],
             ]),
 
             'experiences' => $request->validate([
-                'company' => ['required', 'string', 'max:255'],
-                'position' => ['required', 'string', 'max:255'],
-                'location' => ['nullable', 'string', 'max:255'],
-                'start_date' => ['nullable', 'date'],
-                'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-                'description' => ['nullable', 'string'],
-                'logo' => ['nullable', 'string', 'max:255'],
-                'is_active' => ['nullable', 'boolean'],
-                'sort_order' => ['nullable', 'integer', 'min:0'],
+                'company' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'position' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'location' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'start_date' => [
+                    'nullable',
+                    'date',
+                ],
+
+                'end_date' => [
+                    'nullable',
+                    'date',
+                    'after_or_equal:start_date',
+                ],
+
+                'description' => [
+                    'nullable',
+                    'string',
+                ],
+
+                'logo' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'is_active' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'sort_order' => [
+                    'nullable',
+                    'integer',
+                    'min:0',
+                ],
             ]),
 
             'organizations' => $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'position' => ['nullable', 'string', 'max:255'],
-                'period' => ['nullable', 'string', 'max:255'],
-                'location' => ['nullable', 'string', 'max:255'],
-                'description' => ['nullable', 'string'],
-                'achievement' => ['nullable', 'string'],
-                'logo' => ['nullable', 'string', 'max:255'],
-                'is_active' => ['nullable', 'boolean'],
-                'sort_order' => ['nullable', 'integer', 'min:0'],
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'position' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'period' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'location' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'description' => [
+                    'nullable',
+                    'string',
+                ],
+
+                'achievement' => [
+                    'nullable',
+                    'string',
+                ],
+
+                'logo' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'is_active' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'sort_order' => [
+                    'nullable',
+                    'integer',
+                    'min:0',
+                ],
             ]),
 
             'skills' => $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'category' => ['nullable', 'string', 'max:255'],
-                'level' => ['required', 'integer', 'min:0', 'max:100'],
-                'icon' => ['nullable', 'string', 'max:255'],
-                'is_active' => ['nullable', 'boolean'],
-                'sort_order' => ['nullable', 'integer', 'min:0'],
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'category' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'level' => [
+                    'required',
+                    'integer',
+                    'min:0',
+                    'max:100',
+                ],
+
+                'icon' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'is_active' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'sort_order' => [
+                    'nullable',
+                    'integer',
+                    'min:0',
+                ],
             ]),
 
             'certificates' => $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'issuer' => ['nullable', 'string', 'max:255'],
-                'issued_at' => ['nullable', 'string', 'max:100'],
-                'credential_id' => ['nullable', 'string', 'max:255'],
-                'credential_url' => ['nullable', 'url', 'max:500'],
-                'image' => ['nullable', 'string', 'max:500'],
-                'file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp,gif', 'max:10240'],
-                'description' => ['nullable', 'string'],
-                'is_active' => ['nullable', 'boolean'],
-                'sort_order' => ['nullable', 'integer', 'min:0'],
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                ],
+
+                'issuer' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'issued_at' => [
+                    'nullable',
+                    'string',
+                    'max:100',
+                ],
+
+                'credential_id' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                ],
+
+                'credential_url' => [
+                    'nullable',
+                    'url',
+                    'max:500',
+                ],
+
+                'image' => [
+                    'nullable',
+                    'string',
+                    'max:500',
+                ],
+
+                'file' => [
+                    'nullable',
+                    'file',
+                    'mimes:pdf,jpg,jpeg,png,webp,gif',
+                    'max:10240',
+                ],
+
+                'description' => [
+                    'nullable',
+                    'string',
+                ],
+
+                'is_active' => [
+                    'nullable',
+                    'boolean',
+                ],
+
+                'sort_order' => [
+                    'nullable',
+                    'integer',
+                    'min:0',
+                ],
             ]),
 
-            'projects' => $this->projectData($request, $ignore),
+            'projects' => $this->projectData(
+                $request,
+                $ignore
+            ),
 
             default => [],
         };
     }
 
-    private function projectData(Request $request, ?int $ignore = null): array
-    {
-        $slugRule = Rule::unique('projects', 'slug');
+    private function projectData(
+        Request $request,
+        ?int $ignore = null
+    ): array {
+        $slugRule = Rule::unique(
+            'projects',
+            'slug'
+        );
 
         if ($ignore) {
             $slugRule->ignore($ignore);
         }
 
         $request->merge([
-            'slug' => Str::slug($request->input('slug') ?: $request->input('name')),
+            'slug' => Str::slug(
+                $request->input('slug')
+                ?: $request->input('name')
+            ),
         ]);
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', $slugRule],
-            'category' => ['nullable', 'string', 'max:255'],
-            'thumbnail' => ['nullable', 'string', 'max:500'],
-            'short_description' => ['nullable', 'string', 'max:500'],
-            'description' => ['nullable', 'string'],
-            'year' => ['nullable', 'string', 'max:20'],
-            'github_url' => ['nullable', 'url', 'max:500'],
-            'demo_url' => ['nullable', 'url', 'max:500'],
-            'status' => ['required', 'in:draft,published'],
-            'is_featured' => ['nullable', 'boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                $slugRule,
+            ],
+
+            'category' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'thumbnail' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+
+            'short_description' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+
+            'description' => [
+                'nullable',
+                'string',
+            ],
+
+            'year' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'github_url' => [
+                'nullable',
+                'url',
+                'max:500',
+            ],
+
+            'demo_url' => [
+                'nullable',
+                'url',
+                'max:500',
+            ],
+
+            'status' => [
+                'required',
+                'in:draft,published',
+            ],
+
+            'is_featured' => [
+                'nullable',
+                'boolean',
+            ],
+
+            'sort_order' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
         ]);
 
         return $data;
