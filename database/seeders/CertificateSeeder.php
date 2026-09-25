@@ -12,7 +12,7 @@ class CertificateSeeder extends Seeder
         // Hapus seluruh data sertifikat lama agar tidak terjadi duplikat.
         DB::table('certificates')->truncate();
 
-        // Masukkan 12 sertifikat.
+        // Masukkan 14 sertifikat.
         DB::table('certificates')->insert([
 
             // =========================================================
@@ -227,6 +227,42 @@ class CertificateSeeder extends Seeder
                 'description' => 'Sertifikat kelulusan kelas Spec-Driven Development dengan Kiro.',
                 'is_active' => true,
                 'sort_order' => 12,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // =========================================================
+            // 13. Membangun Aplikasi Gen AI dengan Microsoft Azure
+            // =========================================================
+            [
+                'name' => 'Membangun Aplikasi Gen AI dengan Microsoft Azure',
+                'issuer' => 'Dicoding',
+                'issued_at' => '2026-09-24',
+                'credential_id' => 'EYX4OY46WXDL',
+                'credential_url' => 'https://www.dicoding.com/certificates/EYX4OY46WXDL',
+                'image' => 'assets/certificates/sertifikat-membangun-aplikasi-gen-ai-azure.png',
+                'file' => null,
+                'description' => 'Sertifikat kelulusan kelas Membangun Aplikasi Gen AI dengan Microsoft Azure.',
+                'is_active' => true,
+                'sort_order' => 13,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // =========================================================
+            // 14. Belajar Penerapan Data Science dengan Microsoft Fabric
+            // =========================================================
+            [
+                'name' => 'Belajar Penerapan Data Science dengan Microsoft Fabric',
+                'issuer' => 'Dicoding',
+                'issued_at' => '2026-09-24',
+                'credential_id' => 'JMZVL1KWOXN9',
+                'credential_url' => 'https://www.dicoding.com/certificates/JMZVL1KWOXN9',
+                'image' => 'assets/certificates/sertifikat-penerapan-data-science-microsoft-fabric.png',
+                'file' => null,
+                'description' => 'Sertifikat kelulusan kelas Belajar Penerapan Data Science dengan Microsoft Fabric.',
+                'is_active' => true,
+                'sort_order' => 14,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
