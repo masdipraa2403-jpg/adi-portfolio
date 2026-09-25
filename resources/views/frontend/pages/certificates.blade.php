@@ -71,8 +71,15 @@
         // 12. Spec-Driven Development dengan Kiro
         'spec_driven_development_dengan_kiro'
             => 'assets/certificates/sertifikat-spec-driven-development-kiro.png',
-    ];
 
+        // 13. Membangun Aplikasi Gen AI dengan Microsoft Azure
+        'membangun_aplikasi_gen_ai_dengan_microsoft_azure'
+            => 'assets/certificates/sertifikat-membangun-aplikasi-gen-ai-azure.png',
+
+        // 14. Belajar Penerapan Data Science dengan Microsoft Fabric
+        'belajar_penerapan_data_science_dengan_microsoft_fabric'
+            => 'assets/certificates/sertifikat-penerapan-data-science-microsoft-fabric.png',
+    ];
 
     /*
     |--------------------------------------------------------------------------
@@ -81,7 +88,6 @@
     */
 
     $normalize = function ($value) {
-
         $value = strtolower(trim((string) $value));
 
         $value = str_replace(
@@ -94,7 +100,6 @@
 
         return trim($value);
     };
-
 
     /*
     |--------------------------------------------------------------------------
@@ -209,6 +214,7 @@
                                             $filePath,
                                             strlen('storage/')
                                         );
+
                                     }
 
                                     $fileUrl = asset(
@@ -391,7 +397,7 @@
         @else
 
             {{-- =============================================================
-                EMPTY STATE
+                 EMPTY STATE
             ============================================================== --}}
 
             <div class="empty-state">
@@ -417,7 +423,6 @@
 </section>
 
 
-
 <style>
 
 /*
@@ -427,27 +432,16 @@
 */
 
 .certificate-preview {
-
     position: relative;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     width: 100%;
-
     min-height: 280px;
-
     overflow: hidden;
-
     background: #f5f0e8;
-
     text-decoration: none;
-
 }
-
 
 
 /*
@@ -457,31 +451,19 @@
 */
 
 .certificate-preview-image img {
-
     display: block;
-
     width: 100%;
-
     height: 280px;
-
     object-fit: contain;
-
     object-position: center;
-
     background: #f5f0e8;
-
     transition: transform .35s ease;
-
 }
-
 
 
 .certificate-preview-image:hover img {
-
     transform: scale(1.02);
-
 }
-
 
 
 /*
@@ -491,54 +473,33 @@
 */
 
 .certificate-preview-overlay {
-
     position: absolute;
-
     left: 0;
-
     right: 0;
-
     bottom: 0;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     padding: 18px;
-
     background: linear-gradient(
         to top,
         rgba(30, 25, 20, .72),
         rgba(30, 25, 20, 0)
     );
-
     color: #fff;
-
     font-size: .82rem;
-
     font-weight: 600;
-
     opacity: 0;
-
     transform: translateY(8px);
-
     transition: .25s ease;
-
 }
-
 
 
 .certificate-preview-image:hover
 .certificate-preview-overlay {
-
     opacity: 1;
-
     transform: translateY(0);
-
 }
-
 
 
 /*
@@ -548,33 +509,20 @@
 */
 
 .certificate-image-error {
-
     background: #f5f0e8;
-
 }
-
 
 
 .certificate-image-error::after {
-
     content: 'Preview belum tersedia';
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     width: 100%;
-
     height: 280px;
-
     color: #675f54;
-
     font-size: .82rem;
-
 }
-
 
 
 /*
@@ -584,57 +532,33 @@
 */
 
 .certificate-preview-placeholder {
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
-
     gap: 10px;
-
     width: 100%;
-
     min-height: 280px;
-
     color: #675f54;
-
     background: #f5f0e8;
-
 }
-
 
 
 .certificate-preview-placeholder strong {
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     width: 64px;
-
     height: 64px;
-
     border: 1px solid rgba(103, 95, 84, .2);
-
     border-radius: 50%;
-
     font-size: 1rem;
-
 }
-
 
 
 .certificate-preview-placeholder span {
-
     font-size: .8rem;
-
 }
-
 
 
 /*
@@ -644,39 +568,25 @@
 */
 
 .certificate-body {
-
     min-height: 160px;
-
 }
-
 
 
 .certificate-body h3 {
-
     line-height: 1.25;
-
     margin-bottom: 8px;
-
 }
-
 
 
 .certificate-body p {
-
     margin-bottom: 8px;
-
 }
-
 
 
 .certificate-body > span {
-
     display: block;
-
     margin-bottom: 5px;
-
 }
-
 
 
 /*
@@ -688,33 +598,22 @@
 @media (max-width: 768px) {
 
     .certificate-preview {
-
         min-height: 220px;
-
     }
-
 
 
     .certificate-preview-image img {
-
         height: 220px;
-
     }
-
 
 
     .certificate-preview-placeholder {
-
         min-height: 220px;
-
     }
 
 
-
     .certificate-image-error::after {
-
         height: 220px;
-
     }
 
 }
